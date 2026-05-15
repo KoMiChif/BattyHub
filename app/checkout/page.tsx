@@ -6,6 +6,7 @@ import { Wordmark } from "@/components/Wordmark";
 import { PlaceImg } from "@/components/PlaceImg";
 import { CartSummary } from "@/components/CartSummary";
 import { useCartTotals } from "@/lib/cart-store";
+import { useAuth } from "@/lib/auth-store";
 import { fmtUsd } from "@/lib/cart";
 import styles from "./page.module.css";
 
@@ -14,14 +15,12 @@ export default function CheckoutPage() {
   useEffect(() => setMounted(true), []);
 
   const { lines, subtotal, shipping, tax, total } = useCartTotals();
+  const user = useAuth((s) => s.user);
 
   if (!mounted) {
     return (
       <div>
-        <header className={styles.header}>
-          <Wordmark size={20} />
-          <span className={styles.headerNote}>Secure checkout · 256-bit SSL</span>
-        </header>
+        <CheckoutHeader />
       </div>
     );
   }
@@ -29,10 +28,7 @@ export default function CheckoutPage() {
   if (lines.length === 0) {
     return (
       <div>
-        <header className={styles.header}>
-          <Wordmark size={20} />
-          <span className={styles.headerNote}>Secure checkout · 256-bit SSL</span>
-        </header>
+        <CheckoutHeader />
         <div style={{ padding: "96px 20px", textAlign: "center" }}>
           <p style={{ fontSize: 18, marginBottom: 16 }}>Cart is empty.</p>
           <Link href="/shop">
@@ -45,10 +41,7 @@ export default function CheckoutPage() {
 
   return (
     <div>
-      <header className={styles.header}>
-        <Wordmark size={20} />
-        <span className={styles.headerNote}>Secure checkout · 256-bit SSL</span>
-      </header>
+      <CheckoutHeader />
 
       <button className={styles.mobileSummaryToggle}>
         <span>
@@ -75,8 +68,20 @@ export default function CheckoutPage() {
 
           <FormSection title="Contact">
             <Field label="Email">
-              <input className="bh-input" defaultValue="" placeholder="you@example.com" />
+              <input
+                key={user?.email ?? "guest"}
+                className="bh-input"
+                type="email"
+                required
+                defaultValue={user?.email ?? ""}
+                placeholder="you@example.com"
+              />
             </Field>
+            {!user && (
+              <p style={{ fontSize: 12, color: "var(--bh-gray-400)", marginTop: -4 }}>
+                Checking out as guest. <Link href="/login?next=/checkout" style={{ textDecoration: "underline" }}>Sign in</Link> to save your address for next time.
+              </p>
+            )}
           </FormSection>
 
           <FormSection title="Shipping address">
@@ -173,6 +178,27 @@ export default function CheckoutPage() {
         </aside>
       </section>
     </div>
+  );
+}
+
+function CheckoutHeader() {
+  return (
+    <header className={styles.header}>
+      <Link
+        href="/cart"
+        style={{
+          fontSize: 13,
+          color: "var(--bh-gray-400)",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        ← Cart
+      </Link>
+      <Wordmark size={20} />
+      <span className={styles.headerNote}>Secure checkout · 256-bit SSL</span>
+    </header>
   );
 }
 

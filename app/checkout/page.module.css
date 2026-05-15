@@ -1,10 +1,13 @@
 .header {
   padding: 14px 20px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   border-bottom: 1px solid var(--bh-gray-200);
 }
+.header > :first-child { justify-self: flex-start; }
+.header > :last-child  { justify-self: flex-end; text-align: right; }
+
 .headerNote {
   font-size: 10px;
   color: var(--bh-gray-400);

@@ -38,6 +38,10 @@ export function register(email: string, password: string, name?: string) {
   return postJson<AuthResponse>("/api/auth/register", { email, password, name });
 }
 
+export function loginWithGoogle(credential: string) {
+  return postJson<AuthResponse>("/api/auth/google", { credential });
+}
+
 export async function fetchMe(token: string): Promise<AuthUser | null> {
   try {
     const res = await fetch(`${API_URL}/api/auth/me`, {

@@ -51,6 +51,23 @@
   gap: 14px;
 }
 
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--bh-gray-400);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.divider > span:first-child,
+.divider > span:last-child {
+  flex: 1;
+  height: 1px;
+  background: var(--bh-gray-200);
+}
+
 .row {
   display: grid;
   gap: 6px;

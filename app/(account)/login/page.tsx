@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Wordmark } from "@/components/Wordmark";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { useAuth } from "@/lib/auth-store";
-import { login } from "@/lib/auth-api";
+import { login, loginWithGoogle } from "@/lib/auth-api";
 import styles from "../account.module.css";
 
 export default function LoginPage() {
@@ -41,6 +42,17 @@ function LoginInner() {
     router.push(next);
   }
 
+  async function handleGoogle(credential: string) {
+    setError(null);
+    const { data, error } = await loginWithGoogle(credential);
+    if (error || !data) {
+      setError(error ?? "Google sign-in failed");
+      return;
+    }
+    setSession(data.user, data.token);
+    router.push(next);
+  }
+
   return (
     <div className={styles.shell}>
       <header className={styles.topbar}>
@@ -56,9 +68,15 @@ function LoginInner() {
             Welcome back. Check out faster and track your orders.
           </p>
 
-          <form onSubmit={handleSubmit} className={styles.form}>
-            {error && <div className={styles.errorBox}>{error}</div>}
+          {error && <div className={styles.errorBox} style={{ marginBottom: 16 }}>{error}</div>}
 
+          <GoogleSignInButton text="signin_with" onCredential={handleGoogle} />
+
+          <div className={styles.divider}>
+            <span /><span>or</span><span />
+          </div>
+
+          <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.row}>
               <label className="bh-label" htmlFor="email">Email</label>
               <input

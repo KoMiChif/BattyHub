@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { validateBody } from "../middleware/validate.js";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth, optionalAuth } from "../middleware/auth.js";
 import { HttpError } from "../middleware/error.js";
 import { requireStripe } from "../lib/stripe.js";
 
@@ -17,6 +17,10 @@ const checkoutSchema = z.object({
       }),
     )
     .min(1),
+  customer: z.object({
+    email: z.string().email(),
+    name: z.string().optional(),
+  }),
   shipping: z.object({
     line1: z.string().min(1),
     line2: z.string().optional(),
@@ -57,11 +61,11 @@ ordersRouter.get("/:id", requireAuth, async (req, res, next) => {
 
 ordersRouter.post(
   "/checkout",
-  requireAuth,
+  optionalAuth,
   validateBody(checkoutSchema),
   async (req, res, next) => {
     try {
-      const { items, shipping } = req.body as z.infer<typeof checkoutSchema>;
+      const { items, shipping, customer } = req.body as z.infer<typeof checkoutSchema>;
 
       const productIds = items.map((i) => i.productId);
       const products = await prisma.product.findMany({
@@ -95,7 +99,9 @@ ordersRouter.post(
         }
         return tx.order.create({
           data: {
-            userId: req.user!.sub,
+            userId: req.user?.sub ?? null,
+            customerEmail: customer.email,
+            customerName: customer.name,
             totalAmount: total,
             shippingLine1: shipping.line1,
             shippingLine2: shipping.line2,
@@ -112,6 +118,7 @@ ordersRouter.post(
       const stripe = requireStripe();
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
+        customer_email: customer.email,
         line_items: orderItems.map((i) => ({
           price_data: {
             currency: "usd",

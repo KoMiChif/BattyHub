@@ -7,26 +7,38 @@ import { HttpError } from "../middleware/error.js";
 
 export const productsRouter: Router = Router();
 
+const tierEnum = z.enum(["TOURNAMENT", "CLUB", "PRACTICE"]);
+
 const productSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
   description: z.string().optional(),
   price: z.number().int().nonnegative(),
+  salePrice: z.number().int().nonnegative().nullable().optional(),
   currency: z.string().default("USD"),
   stock: z.number().int().nonnegative().default(0),
   imageUrl: z.string().url().optional(),
+  tier: tierEnum.default("CLUB"),
   featherType: z.string().optional(),
   speed: z.string().optional(),
   brandId: z.string().optional(),
   isActive: z.boolean().default(true),
 });
 
+function parseTier(input: unknown): "TOURNAMENT" | "CLUB" | "PRACTICE" | undefined {
+  if (typeof input !== "string") return undefined;
+  const upper = input.toUpperCase();
+  return upper === "TOURNAMENT" || upper === "CLUB" || upper === "PRACTICE" ? upper : undefined;
+}
+
 productsRouter.get("/", async (req, res, next) => {
   try {
-    const { brand, active } = req.query;
+    const { brand, active, tier } = req.query;
+    const tierFilter = parseTier(tier);
     const products = await prisma.product.findMany({
       where: {
         ...(brand ? { brand: { slug: String(brand) } } : {}),
+        ...(tierFilter ? { tier: tierFilter } : {}),
         ...(active === undefined ? { isActive: true } : { isActive: active === "true" }),
       },
       include: { brand: true },

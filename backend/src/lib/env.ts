@@ -10,6 +10,7 @@ const schema = z.object({
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
 });
 
 const parsed = schema.safeParse(process.env);

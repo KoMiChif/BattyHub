@@ -1,0 +1,206 @@
+.utilityBar {
+  background: #000;
+  color: #fff;
+  font-size: 11px;
+  padding: 7px 20px;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+.utilityBar .right { display: none; }
+
+@media (min-width: 768px) {
+  .utilityBar {
+    font-size: 12px;
+    padding: 8px 48px;
+    display: flex;
+    justify-content: space-between;
+    text-align: left;
+  }
+  .utilityBar .right { display: inline; opacity: 0.6; }
+}
+
+.hero {
+  position: relative;
+  background: #0E0E0E;
+  color: #fff;
+}
+
+.heroInner {
+  height: 560px;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroBg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #151515 0%, #050505 100%);
+}
+
+.heroGlyph {
+  position: absolute;
+  right: -25%;
+  top: -5%;
+  width: 110%;
+  height: 90%;
+}
+
+.heroContent {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 32px;
+}
+
+.heroKicker {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 12px;
+}
+
+.heroTitle {
+  font-size: 64px;
+  color: #fff;
+}
+
+.heroCta {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 28px;
+}
+
+.heroCta button { width: 100%; }
+
+.heroSpec { display: none; }
+
+@media (min-width: 768px) {
+  .heroInner { height: 760px; }
+  .heroGlyph { right: -4%; top: -4%; width: 70%; height: 108%; opacity: 0.7; }
+  .heroContent {
+    left: 48px;
+    right: 48px;
+    bottom: 56px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 48px;
+  }
+  .heroKicker { font-size: 12px; margin-bottom: 18px; }
+  .heroTitle { font-size: 112px; max-width: 900px; }
+  .heroCta { flex-direction: row; gap: 16px; align-items: center; margin-top: 36px; }
+  .heroCta button { width: auto; }
+  .heroSpec {
+    display: block;
+    width: 200px;
+    text-align: right;
+    font-size: 12px;
+    opacity: 0.7;
+    line-height: 1.6;
+  }
+  .heroSpec > div {
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    padding-top: 10px;
+  }
+}
+
+.heroSubcopy { font-size: 13px; opacity: 0.7; }
+
+.section { padding: 56px 20px 0; }
+.section:last-of-type { padding-bottom: 80px; }
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 36px;
+  line-height: 1.02;
+}
+
+.sectionLink {
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.categoryGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.categoryCardTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.categoryCardTitle {
+  font-size: 22px;
+}
+
+.categoryCardCount {
+  font-size: 12px;
+  color: var(--bh-gray-400);
+}
+
+.categoryCardTag {
+  font-size: 12px;
+  color: var(--bh-gray-400);
+  margin-top: 2px;
+}
+
+.featuredGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.brandTitle {
+  font-size: 44px;
+  line-height: 1.02;
+}
+
+.brandStats {
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.brandStatNum {
+  font-size: 32px;
+  font-family: var(--bh-font-display);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.brandStatLabel {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--bh-gray-400);
+}
+
+@media (min-width: 768px) {
+  .section { padding: 128px 48px 0; }
+  .section:last-of-type { padding-bottom: 160px; }
+  .sectionHeader { margin-bottom: 48px; }
+  .sectionTitle { font-size: 56px; }
+  .categoryGrid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .categoryCardTitle { font-size: 28px; }
+  .categoryCardCount { font-size: 13px; }
+  .categoryCardTag { font-size: 13px; margin-top: 4px; }
+  .featuredGrid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .brandTitle { font-size: 96px; }
+  .brandStats { margin-top: 64px; gap: 24px; max-width: 960px; }
+  .brandStatNum { font-size: 64px; }
+  .brandStatLabel { font-size: 14px; margin-top: 12px; }
+}

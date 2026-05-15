@@ -1,12 +1,47 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Wordmark } from "@/components/Wordmark";
 import { PlaceImg } from "@/components/PlaceImg";
 import { CartSummary } from "@/components/CartSummary";
-import { SAMPLE_CART, cartTotals, fmtUsd } from "@/lib/cart";
+import { useCartTotals } from "@/lib/cart-store";
+import { fmtUsd } from "@/lib/cart";
 import styles from "./page.module.css";
 
 export default function CheckoutPage() {
-  const lines = SAMPLE_CART;
-  const totals = cartTotals(lines);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const { lines, subtotal, shipping, tax, total } = useCartTotals();
+
+  if (!mounted) {
+    return (
+      <div>
+        <header className={styles.header}>
+          <Wordmark size={20} />
+          <span className={styles.headerNote}>Secure checkout · 256-bit SSL</span>
+        </header>
+      </div>
+    );
+  }
+
+  if (lines.length === 0) {
+    return (
+      <div>
+        <header className={styles.header}>
+          <Wordmark size={20} />
+          <span className={styles.headerNote}>Secure checkout · 256-bit SSL</span>
+        </header>
+        <div style={{ padding: "96px 20px", textAlign: "center" }}>
+          <p style={{ fontSize: 18, marginBottom: 16 }}>Cart is empty.</p>
+          <Link href="/shop">
+            <button className="bh-btn bh-btn--lg">Shop shuttles →</button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -22,7 +57,7 @@ export default function CheckoutPage() {
             <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" fill="none" />
           </svg>
         </span>
-        <span className="bh-tnum">{fmtUsd(totals.total)}</span>
+        <span className="bh-tnum">{fmtUsd(total)}</span>
       </button>
 
       <section className={styles.layout}>
@@ -40,7 +75,7 @@ export default function CheckoutPage() {
 
           <FormSection title="Contact">
             <Field label="Email">
-              <input className="bh-input" defaultValue="alex@example.com" />
+              <input className="bh-input" defaultValue="" placeholder="you@example.com" />
             </Field>
           </FormSection>
 
@@ -50,24 +85,24 @@ export default function CheckoutPage() {
             </Field>
             <div className={styles.row2}>
               <Field label="First name">
-                <input className="bh-input" defaultValue="Alex" />
+                <input className="bh-input" placeholder="First name" />
               </Field>
               <Field label="Last name">
-                <input className="bh-input" defaultValue="Chen" />
+                <input className="bh-input" placeholder="Last name" />
               </Field>
             </div>
             <Field label="Address">
-              <input className="bh-input" defaultValue="2240 Sunset Blvd" />
+              <input className="bh-input" placeholder="123 Main St" />
             </Field>
             <div className={styles.row3}>
               <Field label="City">
-                <input className="bh-input" defaultValue="Los Angeles" />
+                <input className="bh-input" placeholder="City" />
               </Field>
               <Field label="State">
-                <input className="bh-input" defaultValue="CA" />
+                <input className="bh-input" placeholder="State" />
               </Field>
               <Field label="ZIP">
-                <input className="bh-input" defaultValue="90026" />
+                <input className="bh-input" placeholder="ZIP" />
               </Field>
             </div>
           </FormSection>
@@ -92,15 +127,18 @@ export default function CheckoutPage() {
               </Field>
             </div>
             <Field label="Name on card">
-              <input className="bh-input" defaultValue="Alex Chen" />
+              <input className="bh-input" placeholder="Name as it appears on card" />
             </Field>
             <div className={styles.paymentNote}>
               Payments processed by Stripe. Your card details never touch our servers.
             </div>
           </FormSection>
 
-          <button className={`bh-btn bh-btn--lg bh-btn--block ${styles.placeOrderBtn}`}>
-            Place Order · {fmtUsd(totals.total)}
+          <button
+            className={`bh-btn bh-btn--lg bh-btn--block ${styles.placeOrderBtn}`}
+            onClick={() => alert("TODO: POST /api/orders/checkout → redirect to Stripe")}
+          >
+            Place Order · {fmtUsd(total)}
           </button>
 
           <div className={styles.secureNote}>
@@ -111,7 +149,7 @@ export default function CheckoutPage() {
         <aside className={styles.summary}>
           <div className={styles.summaryTitle}>Order ({lines.length})</div>
           {lines.map((l) => (
-            <div key={l.id} className={styles.summaryLine}>
+            <div key={l.slug} className={styles.summaryLine}>
               <div className={styles.summaryThumb}>
                 <PlaceImg ratio="1/1" glyph="shuttle" />
                 <span className={`bh-tnum ${styles.summaryQty}`}>{l.qty}</span>
@@ -120,9 +158,7 @@ export default function CheckoutPage() {
                 <div className={styles.summaryName}>{l.name}</div>
                 <div className={styles.summaryMeta}>{l.meta}</div>
               </div>
-              <div className={`bh-tnum ${styles.summaryPrice}`}>
-                {fmtUsd(l.price * l.qty)}
-              </div>
+              <div className={`bh-tnum ${styles.summaryPrice}`}>{fmtUsd(l.price * l.qty)}</div>
             </div>
           ))}
 
@@ -133,7 +169,7 @@ export default function CheckoutPage() {
             </button>
           </div>
 
-          <CartSummary {...totals} />
+          <CartSummary subtotal={subtotal} shipping={shipping} tax={tax} total={total} />
         </aside>
       </section>
     </div>

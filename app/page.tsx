@@ -4,12 +4,17 @@ import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { PlaceImg } from "@/components/PlaceImg";
 import { RacketGlyph } from "@/components/glyphs";
-import { PRODUCTS, CATEGORIES } from "@/lib/products";
+import { CATEGORIES } from "@/lib/products";
+import { getProducts } from "@/lib/api";
 import styles from "./page.module.css";
 
-const featured = PRODUCTS.slice(0, 4);
-
-export default function Home() {
+export default async function Home() {
+  const all = await getProducts();
+  const featured = all.slice(0, 4);
+  const tierCounts: Record<string, number> = {};
+  for (const p of all) {
+    if (p.tier) tierCounts[p.tier] = (tierCounts[p.tier] ?? 0) + 1;
+  }
   return (
     <div>
       <div className={styles.utilityBar}>
@@ -18,7 +23,7 @@ export default function Home() {
       </div>
 
       <section className={styles.hero}>
-        <Nav cartCount={0} transparent />
+        <Nav transparent />
         <div className={styles.heroInner}>
           <div className={styles.heroBg}>
             <div className={styles.heroGlyph}>
@@ -74,7 +79,9 @@ export default function Home() {
               <div style={{ paddingTop: 20 }}>
                 <div className={styles.categoryCardTitleRow}>
                   <h3 className={styles.categoryCardTitle}>{c.name}</h3>
-                  <span className={`bh-tnum ${styles.categoryCardCount}`}>{c.count} SKUs</span>
+                  <span className={`bh-tnum ${styles.categoryCardCount}`}>
+                    {tierCounts[c.name] ?? 0} SKUs
+                  </span>
                 </div>
                 <div className={styles.categoryCardTag}>{c.tag}</div>
               </div>

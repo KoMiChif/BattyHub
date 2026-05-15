@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PlaceImg } from "./PlaceImg";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/lib/api";
 
 type ProductCardProps = {
   p: Product;
@@ -10,7 +10,7 @@ type ProductCardProps = {
 export function ProductCard({ p, size = "md" }: ProductCardProps) {
   const isSm = size === "sm";
   return (
-    <Link href={`/product/${p.id}`} style={{ display: "block", color: "inherit" }}>
+    <Link href={`/product/${p.slug}`} style={{ display: "block", color: "inherit" }}>
       <PlaceImg ratio="1/1" glyph="shuttle" />
       <div style={{ padding: isSm ? "12px 0 0" : "16px 0 0" }}>
         <div
@@ -46,7 +46,7 @@ export function ProductCard({ p, size = "md" }: ProductCardProps) {
             {p.name}
           </span>
           <span className="bh-tnum" style={{ flexShrink: 0 }}>
-            {p.sale ? (
+            {p.salePrice != null ? (
               <>
                 <span
                   style={{
@@ -57,12 +57,12 @@ export function ProductCard({ p, size = "md" }: ProductCardProps) {
                     fontWeight: 400,
                   }}
                 >
-                  ${p.price}
+                  ${p.price.toFixed(0)}
                 </span>
-                <span className="bh-sale">${p.sale}</span>
+                <span className="bh-sale">${p.salePrice.toFixed(0)}</span>
               </>
             ) : (
-              <>${p.price}</>
+              <>${p.price.toFixed(0)}</>
             )}
           </span>
         </div>

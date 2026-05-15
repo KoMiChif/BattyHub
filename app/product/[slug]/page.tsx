@@ -2,33 +2,15 @@ import { notFound } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { PlaceImg } from "@/components/PlaceImg";
-import { fetchProductBySlug, fmtPrice, type Product as ApiProduct } from "@/lib/api";
-import { getProduct as getMockProduct, PRODUCTS } from "@/lib/products";
+import { AddToCart } from "@/components/AddToCart";
+import { getProductBySlug, fmtPrice } from "@/lib/api";
+import { MOCK_PRODUCTS } from "@/lib/products";
 import styles from "./page.module.css";
 
 export const revalidate = 60;
 
 export function generateStaticParams() {
-  return PRODUCTS.map((p) => ({ slug: p.id }));
-}
-
-function mockToApi(slug: string): ApiProduct | null {
-  const m = getMockProduct(slug);
-  if (!m) return null;
-  return {
-    id: m.id,
-    slug: m.id,
-    name: m.name,
-    brand: m.brand,
-    description: "",
-    price: m.price,
-    salePrice: m.sale ?? null,
-    stock: 50,
-    imageUrl: null,
-    feather: m.feather,
-    speed: String(m.speed),
-    tier: m.tier,
-  };
+  return MOCK_PRODUCTS.map((p) => ({ slug: p.slug }));
 }
 
 export default async function ProductPage({
@@ -37,10 +19,9 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = (await fetchProductBySlug(slug)) ?? mockToApi(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const displayPrice = product.salePrice ?? product.price;
   const tierLabel = product.tier ?? product.brand;
   const description =
     product.description ||
@@ -57,7 +38,7 @@ export default async function ProductPage({
 
   return (
     <div>
-      <Nav cartCount={0} />
+      <Nav />
 
       <section className={styles.crumb}>
         Shop / {tierLabel} / {product.name}
@@ -116,44 +97,7 @@ export default async function ProductPage({
             </tbody>
           </table>
 
-          <div className={styles.tubeGroup}>
-            <div className="bh-label">Quantity · 1 tube of 12</div>
-            <div className={styles.tubeButtons}>
-              <button className={`${styles.tubeBtn} ${styles.tubeBtnActive}`}>
-                <span className={styles.tubeBtnLabel}>1 tube</span>
-                <span className={`bh-tnum ${styles.tubeBtnPrice}`}>{fmtPrice(displayPrice)}</span>
-              </button>
-              <button className={styles.tubeBtn}>
-                <span className={styles.tubeBtnLabel}>4 tubes</span>
-                <span className={`bh-tnum ${styles.tubeBtnPrice}`}>
-                  {fmtPrice(displayPrice * 4 - 8)} · save $8
-                </span>
-              </button>
-              <button className={styles.tubeBtn}>
-                <span className={styles.tubeBtnLabel}>Case (10)</span>
-                <span className={`bh-tnum ${styles.tubeBtnPrice}`}>
-                  {fmtPrice(displayPrice * 10 - 44)} · save $44
-                </span>
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.qtyRow}>
-            <div className={styles.qty}>
-              <button aria-label="Decrease quantity">−</button>
-              <span className={`bh-tnum ${styles.qtyVal}`}>1</span>
-              <button aria-label="Increase quantity">+</button>
-            </div>
-            <button
-              className="bh-btn bh-btn--lg"
-              style={{ flex: 1 }}
-              disabled={product.stock <= 0}
-            >
-              {product.stock <= 0
-                ? "Out of stock"
-                : `Add to Cart — ${fmtPrice(displayPrice)}`}
-            </button>
-          </div>
+          <AddToCart product={product} />
 
           <div className={styles.assurances}>
             <span>✓ Free shipping over $99</span>

@@ -106,7 +106,10 @@
   padding: 7px 0;
   font-size: 14px;
   cursor: pointer;
+  color: inherit;
+  text-decoration: none;
 }
+.filterItem:hover .filterLabel { text-decoration: underline; text-underline-offset: 3px; }
 .filterItemChecked { font-weight: 600; }
 
 .filterLabel {
@@ -160,12 +163,17 @@
   background: #000;
   color: #fff;
   padding: 4px 10px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
+.chip:hover { background: var(--bh-gray-700); }
 
 .clearLink {
   margin-left: 8px;
   text-decoration: underline;
   cursor: pointer;
+  color: var(--bh-gray-400);
 }
 
 .sortLabel {

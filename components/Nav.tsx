@@ -1,18 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import { Wordmark } from "./Wordmark";
+import { useCart } from "@/lib/cart-store";
 import styles from "./Nav.module.css";
 
 type NavProps = {
-  cartCount?: number;
   transparent?: boolean;
 };
 
-export function Nav({ cartCount = 0, transparent = false }: NavProps) {
+export function Nav({ transparent = false }: NavProps) {
+  const cartCount = useCart((s) => s.lines.reduce((n, l) => n + l.qty, 0));
+
   return (
-    <header
-      className={`${styles.nav} ${transparent ? styles.transparent : ""}`}
-    >
-      {/* Desktop left nav */}
+    <header className={`${styles.nav} ${transparent ? styles.transparent : ""}`}>
       <nav className={`${styles.left} bh-hide-md`}>
         <div className={styles.hamburger} aria-label="Menu">
           <span />
@@ -37,9 +38,7 @@ export function Nav({ cartCount = 0, transparent = false }: NavProps) {
         <span className={`${styles.subtle} bh-show-md`}>Account</span>
         <Link href="/cart" className={styles.cart}>
           Cart
-          <span className={`${styles.cartBadge} bh-tnum`}>
-            {cartCount}
-          </span>
+          <span className={`${styles.cartBadge} bh-tnum`}>{cartCount}</span>
         </Link>
       </nav>
     </header>

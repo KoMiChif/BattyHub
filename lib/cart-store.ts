@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type CartLine = {
+  productId: string;
   slug: string;
   name: string;
   brand: string;

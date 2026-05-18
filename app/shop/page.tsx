@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
+import { MobileFilterTrigger } from "@/components/MobileFilterDrawer";
 import { getProducts, type Product, type Tier } from "@/lib/api";
 import {
   parseFilter,
@@ -65,17 +66,12 @@ export default async function ShopPage({
       </section>
 
       <div className={styles.mobileFilterBar}>
-        <span className={styles.mobileFilterBtn} aria-disabled>
-          Filter
-          {activeCount > 0 && (
-            <span
-              className="bh-tnum"
-              style={{ fontSize: 11, color: "#fff", background: "#000", padding: "1px 6px" }}
-            >
-              {activeCount}
-            </span>
-          )}
-        </span>
+        <MobileFilterTrigger
+          sp={sp}
+          filter={filter}
+          counts={counts}
+          activeCount={activeCount}
+        />
         <span className={styles.mobileFilterBtn} aria-disabled>
           Sort: Newest
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none">

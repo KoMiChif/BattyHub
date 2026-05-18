@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 import { Wordmark } from "@/components/Wordmark";
 import { PlaceImg } from "@/components/PlaceImg";
 import { CartSummary } from "@/components/CartSummary";
-import { useCartTotals } from "@/lib/cart-store";
+import { useCart, useCartTotals } from "@/lib/cart-store";
 import { useAuth } from "@/lib/auth-store";
 import { fmtUsd } from "@/lib/cart";
+import { postCheckout, type CheckoutPayload } from "@/lib/orders-api";
 import styles from "./page.module.css";
 
 export default function CheckoutPage() {
@@ -16,6 +17,69 @@ export default function CheckoutPage() {
 
   const { lines, subtotal, shipping, tax, total } = useCartTotals();
   const user = useAuth((s) => s.user);
+  const token = useAuth((s) => s.token);
+  const clearCart = useCart((s) => s.clear);
+
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [country, setCountry] = useState("United States");
+  const [address1, setAddress1] = useState("");
+  const [address2, setAddress2] = useState("");
+  const [city, setCity] = useState("");
+  const [stateRegion, setStateRegion] = useState("");
+  const [zip, setZip] = useState("");
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.email) setEmail(user.email);
+  }, [user?.email]);
+
+  async function handlePlaceOrder() {
+    setError(null);
+    const missing =
+      !email.trim() ||
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !country.trim() ||
+      !address1.trim() ||
+      !city.trim() ||
+      !zip.trim();
+    if (missing) {
+      setError("Please fill in all required fields before placing your order.");
+      return;
+    }
+
+    const fullName = `${firstName} ${lastName}`.trim();
+    const payload: CheckoutPayload = {
+      items: lines.map((l) => ({ productId: l.productId, quantity: l.qty })),
+      customer: {
+        email: email.trim(),
+        name: fullName || undefined,
+      },
+      shipping: {
+        line1: address1.trim(),
+        line2: address2.trim() || undefined,
+        city: city.trim(),
+        state: stateRegion.trim() || undefined,
+        postalCode: zip.trim(),
+        country: country.trim(),
+      },
+    };
+
+    setSubmitting(true);
+    const { data, error: apiError } = await postCheckout(payload, token);
+    if (apiError || !data) {
+      setSubmitting(false);
+      setError(apiError ?? "Could not place your order. Please try again.");
+      return;
+    }
+
+    clearCart();
+    window.location.href = data.checkoutUrl;
+  }
 
   if (!mounted) {
     return (
@@ -69,11 +133,11 @@ export default function CheckoutPage() {
           <FormSection title="Contact">
             <Field label="Email">
               <input
-                key={user?.email ?? "guest"}
                 className="bh-input"
                 type="email"
                 required
-                defaultValue={user?.email ?? ""}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
               />
             </Field>
@@ -86,28 +150,70 @@ export default function CheckoutPage() {
 
           <FormSection title="Shipping address">
             <Field label="Country / Region">
-              <input className="bh-input" defaultValue="United States" />
+              <input
+                className="bh-input"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              />
             </Field>
             <div className={styles.row2}>
               <Field label="First name">
-                <input className="bh-input" placeholder="First name" />
+                <input
+                  className="bh-input"
+                  placeholder="First name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
               </Field>
               <Field label="Last name">
-                <input className="bh-input" placeholder="Last name" />
+                <input
+                  className="bh-input"
+                  placeholder="Last name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
               </Field>
             </div>
             <Field label="Address">
-              <input className="bh-input" placeholder="123 Main St" />
+              <input
+                className="bh-input"
+                placeholder="123 Main St"
+                value={address1}
+                onChange={(e) => setAddress1(e.target.value)}
+              />
+            </Field>
+            <Field label="Apartment, suite, etc. (optional)">
+              <input
+                className="bh-input"
+                placeholder="Apt 4B"
+                value={address2}
+                onChange={(e) => setAddress2(e.target.value)}
+              />
             </Field>
             <div className={styles.row3}>
               <Field label="City">
-                <input className="bh-input" placeholder="City" />
+                <input
+                  className="bh-input"
+                  placeholder="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
               </Field>
               <Field label="State">
-                <input className="bh-input" placeholder="State" />
+                <input
+                  className="bh-input"
+                  placeholder="State"
+                  value={stateRegion}
+                  onChange={(e) => setStateRegion(e.target.value)}
+                />
               </Field>
               <Field label="ZIP">
-                <input className="bh-input" placeholder="ZIP" />
+                <input
+                  className="bh-input"
+                  placeholder="ZIP"
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                />
               </Field>
             </div>
           </FormSection>
@@ -139,11 +245,28 @@ export default function CheckoutPage() {
             </div>
           </FormSection>
 
+          {error && (
+            <div
+              style={{
+                background: "#FFF0F0",
+                color: "#C0392B",
+                border: "1px solid #F4C5C5",
+                padding: "10px 14px",
+                fontSize: 13,
+                marginTop: 8,
+                marginBottom: 8,
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           <button
             className={`bh-btn bh-btn--lg bh-btn--block ${styles.placeOrderBtn}`}
-            onClick={() => alert("TODO: POST /api/orders/checkout → redirect to Stripe")}
+            onClick={handlePlaceOrder}
+            disabled={submitting}
           >
-            Place Order · {fmtUsd(total)}
+            {submitting ? "Placing order…" : `Place Order · ${fmtUsd(total)}`}
           </button>
 
           <div className={styles.secureNote}>

@@ -25,6 +25,7 @@ export function AddToCart({ product }: { product: Product }) {
 
   function handleAdd() {
     addLine({
+      productId: product.id,
       slug: product.slug,
       name: product.name,
       brand: product.brand,

@@ -65,6 +65,9 @@ export default function AccountPage() {
           <Link href="/shop">
             <button className="bh-btn">Continue shopping</button>
           </Link>
+          <Link href="/account/orders">
+            <button className="bh-btn bh-btn--ghost">View orders →</button>
+          </Link>
           <button onClick={handleLogout} className="bh-btn bh-btn--ghost">
             Sign out
           </button>
